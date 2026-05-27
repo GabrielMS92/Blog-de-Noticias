@@ -106,7 +106,7 @@ O servidor sobe em `http://localhost:3000` por padrão.
 
 ## Exemplos de requisições
 
-Os exemplos usam `Invoke-WebRequest` (PowerShell). A flag `-UseBasicParsing` é utilizada para evitar avisos de segurança no console. Para as rotas protegidas, usa os valores das variáveis `$Token`, `$TokenAdmin`, `$RefreshToken` e `$RefreshTokenAdmin`.
+Os exemplos usam `Invoke-WebRequest` (PowerShell). A flag `-UseBasicParsing` é utilizada para evitar avisos de segurança no console. Para as rotas protegidas, usa os valores das variáveis `$Token`, `$TokenAdmin`, `$RefreshToken` e `$RefreshTokenAdmin`, fazer isso no terminal do VsCode.
 
 ---
 
