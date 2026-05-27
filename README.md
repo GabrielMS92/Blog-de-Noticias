@@ -101,45 +101,60 @@ O servidor sobe em `http://localhost:3000` por padrão.
 
 ## Exemplos de requisições
 
-### Registrar usuário
+> Os exemplos usam `Invoke-WebRequest` (PowerShell). Substitua `SEU_TOKEN` e `SEU_TOKEN_ADMIN` pelos tokens retornados no login.
+
+### 1. Registrar usuário comum
+
 ```powershell
-curl.exe -X POST http://localhost:3000/auth/register `
-  -H "Content-Type: application/json" `
-  -d '{\"name\": \"João Silva\", \"email\": \"joao@email.com\", \"password\": \"senha123\"}'
+Invoke-WebRequest -Uri "http://localhost:3000/auth/register" -Method POST -ContentType "application/json" -Body '{"name":"Joao Silva","email":"joao@email.com","password":"senha123"}'
 ```
 
-### Fazer login
+### 2. Registrar administrador
+
+O campo `role` aceita `"ADMIN"` diretamente no registro:
+
 ```powershell
-curl.exe -X POST http://localhost:3000/auth/login `
-  -H "Content-Type: application/json" `
-  -d '{\"email\": \"joao@email.com\", \"password\": \"senha123\"}'
+Invoke-WebRequest -Uri "http://localhost:3000/auth/register" -Method POST -ContentType "application/json" -Body '{"name":"Admin","email":"admin@email.com","password":"senha123","role":"ADMIN"}'
 ```
 
-### Ver perfil autenticado
+### 3. Fazer login
+
 ```powershell
-curl.exe http://localhost:3000/auth/me `
-  -H "Authorization: Bearer <seu_token>"
+Invoke-WebRequest -Uri "http://localhost:3000/auth/login" -Method POST -ContentType "application/json" -Body '{"email":"joao@email.com","password":"senha123"}'
 ```
 
-### Criar notícia
+A resposta retorna `token` (válido por 15 min) e `refreshToken`. Use o `token` nos passos seguintes.
+
+### 4. Ver perfil autenticado
+
 ```powershell
-curl.exe -X POST http://localhost:3000/posts `
-  -H "Content-Type: application/json" `
-  -H "Authorization: Bearer <seu_token>" `
-  -d '{\"title\": \"Minha primeira notícia\", \"content\": \"Conteúdo completo da notícia aqui.\", \"categoryId\": 1}'
+Invoke-WebRequest -Uri "http://localhost:3000/auth/me" -Headers @{Authorization="Bearer SEU_TOKEN"}
 ```
 
-### Listar notícias com paginação
+### 5. Criar categoria (requer token de ADMIN)
+
 ```powershell
-curl.exe "http://localhost:3000/posts?page=1&limit=5&search=api"
+Invoke-WebRequest -Uri "http://localhost:3000/categories" -Method POST -ContentType "application/json" -Headers @{Authorization="Bearer SEU_TOKEN_ADMIN"} -Body '{"name":"Tecnologia"}'
 ```
 
-### Criar categoria (ADMIN)
+### 6. Criar notícia (requer token de usuário autenticado)
+
+Use o `id` da categoria criada no passo anterior em `categoryId`:
+
 ```powershell
-curl.exe -X POST http://localhost:3000/categories `
-  -H "Content-Type: application/json" `
-  -H "Authorization: Bearer <token_admin>" `
-  -d '{\"name\": \"Tecnologia\"}'
+Invoke-WebRequest -Uri "http://localhost:3000/posts" -Method POST -ContentType "application/json" -Headers @{Authorization="Bearer SEU_TOKEN"} -Body '{"title":"Minha primeira noticia","content":"Conteudo completo da noticia aqui.","categoryId":1}'
+```
+
+### 7. Listar notícias com paginação
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/posts?page=1&limit=5&search=noticia"
+```
+
+### 8. Renovar token expirado
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/auth/refresh" -Method POST -ContentType "application/json" -Body '{"refreshToken":"SEU_REFRESH_TOKEN"}'
 ```
 
 ---
