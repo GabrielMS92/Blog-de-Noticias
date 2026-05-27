@@ -106,9 +106,11 @@ O servidor sobe em `http://localhost:3000` por padrão.
 
 ## Exemplos de requisições
 
-Os exemplos usam `Invoke-WebRequest` (PowerShell). A flag `-UseBasicParsing` é utilizada para evitar avisos de segurança no console. Para as rotas protegidas, substitua o valor das variáveis `$Token`, `$TokenAdmin` ou `$RefreshToken` pelos tokens reais retornados no login.
+Os exemplos usam `Invoke-WebRequest` (PowerShell). A flag `-UseBasicParsing` é utilizada para evitar avisos de segurança no console. Para as rotas protegidas, usa os valores das variáveis `$Token`, `$TokenAdmin`, `$RefreshToken` e `$RefreshTokenAdmin`.
 
-### 1. Registrar usuário comum
+---
+
+### Passo 0 — Registrar usuário comum
 
 ```powershell
 Invoke-WebRequest -Uri "http://localhost:3000/auth/register" `
@@ -117,9 +119,9 @@ Invoke-WebRequest -Uri "http://localhost:3000/auth/register" `
   -UseBasicParsing
 ```
 
-### 2. Registrar administrador
+---
 
-O campo `role` aceita `"ADMIN"` diretamente no registro:
+### Passo 1 — Registrar administrador
 
 ```powershell
 Invoke-WebRequest -Uri "http://localhost:3000/auth/register" `
@@ -128,30 +130,134 @@ Invoke-WebRequest -Uri "http://localhost:3000/auth/register" `
   -UseBasicParsing
 ```
 
-### 3. Fazer login
+---
+
+### Passo 2 — Login do usuário comum (salva Token e RefreshToken)
 
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:3000/auth/login" `
+$loginUser = Invoke-WebRequest -Uri "http://localhost:3000/auth/login" `
   -Method POST -ContentType "application/json" `
   -Body '{"email":"joao@email.com","password":"senha123"}' `
-  -UseBasicParsing
+  -UseBasicParsing | ConvertFrom-Json
+
+$Token        = $loginUser.token
+$RefreshToken = $loginUser.refreshToken
 ```
 
-> A resposta retorna `token` (válido por 15 min) e `refreshToken`. Copie esses valores para usar nos passos seguintes.
+---
+
+### Passo 3 — Login do administrador (salva TokenAdmin e RefreshTokenAdmin)
+
+```powershell
+$loginAdmin = Invoke-WebRequest -Uri "http://localhost:3000/auth/login" `
+  -Method POST -ContentType "application/json" `
+  -Body '{"email":"admin@email.com","password":"senha123"}' `
+  -UseBasicParsing | ConvertFrom-Json
+
+$TokenAdmin        = $loginAdmin.token
+$RefreshTokenAdmin = $loginAdmin.refreshToken
+```
+
+---
 
 ### 4. Ver perfil autenticado
 
 ```powershell
-$Token = "COLE_SEU_TOKEN_AQUI"
 Invoke-WebRequest -Uri "http://localhost:3000/auth/me" `
   -Headers @{Authorization="Bearer $Token"} `
   -UseBasicParsing
 ```
 
-### 5. Criar categoria (requer token de ADMIN)
+---
+
+### 5. Renovar token do usuário comum
 
 ```powershell
-$TokenAdmin = "COLE_SEU_TOKEN_ADMIN_AQUI"
+$Body = @{ refreshToken = $RefreshToken } | ConvertTo-Json -Compress
+Invoke-WebRequest -Uri "http://localhost:3000/auth/refresh" `
+  -Method POST -ContentType "application/json" `
+  -Body $Body `
+  -UseBasicParsing
+```
+
+---
+
+### 6. Renovar token do administrador
+
+```powershell
+$Body = @{ refreshToken = $RefreshTokenAdmin } | ConvertTo-Json -Compress
+Invoke-WebRequest -Uri "http://localhost:3000/auth/refresh" `
+  -Method POST -ContentType "application/json" `
+  -Body $Body `
+  -UseBasicParsing
+```
+
+---
+
+### 7. Listar todos os usuários (ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/users" `
+  -Headers @{Authorization="Bearer $TokenAdmin"} `
+  -UseBasicParsing
+```
+
+---
+
+### 8. Buscar usuário por ID (ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/users/1" `
+  -Headers @{Authorization="Bearer $TokenAdmin"} `
+  -UseBasicParsing
+```
+
+---
+
+### 9. Atualizar próprio usuário (dono ou ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/users/1" `
+  -Method PUT -ContentType "application/json" `
+  -Headers @{Authorization="Bearer $Token"} `
+  -Body '{"name":"Joao Atualizado","email":"joao.novo@email.com"}' `
+  -UseBasicParsing
+```
+
+---
+
+### 10. Deletar usuário (ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/users/2" `
+  -Method DELETE `
+  -Headers @{Authorization="Bearer $TokenAdmin"} `
+  -UseBasicParsing
+```
+
+---
+
+### 11. Listar todas as categorias (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/categories" `
+  -UseBasicParsing
+```
+
+---
+
+### 12. Buscar categoria por ID (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/categories/1" `
+  -UseBasicParsing
+```
+
+---
+
+### 13. Criar categoria (ADMIN)
+
+```powershell
 Invoke-WebRequest -Uri "http://localhost:3000/categories" `
   -Method POST -ContentType "application/json" `
   -Headers @{Authorization="Bearer $TokenAdmin"} `
@@ -159,12 +265,61 @@ Invoke-WebRequest -Uri "http://localhost:3000/categories" `
   -UseBasicParsing
 ```
 
-### 6. Criar notícia (requer token de usuário autenticado)
+---
 
-Use o `id` da categoria criada no passo anterior em `categoryId`:
+### 14. Atualizar categoria (ADMIN)
 
 ```powershell
-$Token = "COLE_SEU_TOKEN_AQUI"
+Invoke-WebRequest -Uri "http://localhost:3000/categories/1" `
+  -Method PUT -ContentType "application/json" `
+  -Headers @{Authorization="Bearer $TokenAdmin"} `
+  -Body '{"name":"Tecnologia e Inovacao"}' `
+  -UseBasicParsing
+```
+
+---
+
+### 15. Deletar categoria (ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/categories/1" `
+  -Method DELETE `
+  -Headers @{Authorization="Bearer $TokenAdmin"} `
+  -UseBasicParsing
+```
+
+---
+
+### 16. Listar notícias com paginação (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/posts?page=1&limit=10" `
+  -UseBasicParsing
+```
+
+---
+
+### 17. Listar notícias com busca por termo (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/posts?page=1&limit=5&search=noticia" `
+  -UseBasicParsing
+```
+
+---
+
+### 18. Buscar notícia por ID (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/posts/1" `
+  -UseBasicParsing
+```
+
+---
+
+### 19. Criar notícia (autenticado)
+
+```powershell
 Invoke-WebRequest -Uri "http://localhost:3000/posts" `
   -Method POST -ContentType "application/json" `
   -Headers @{Authorization="Bearer $Token"} `
@@ -172,20 +327,70 @@ Invoke-WebRequest -Uri "http://localhost:3000/posts" `
   -UseBasicParsing
 ```
 
-### 7. Listar notícias com paginação
+---
+
+### 20. Atualizar notícia (dono ou ADMIN)
 
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:3000/posts?page=1&limit=5&search=noticia" -UseBasicParsing
+Invoke-WebRequest -Uri "http://localhost:3000/posts/1" `
+  -Method PUT -ContentType "application/json" `
+  -Headers @{Authorization="Bearer $Token"} `
+  -Body '{"title":"Titulo atualizado","content":"Conteudo atualizado com mais detalhes.","categoryId":1}' `
+  -UseBasicParsing
 ```
 
-### 8. Renovar token expirado
+---
+
+### 21. Deletar notícia — soft delete (dono ou ADMIN)
 
 ```powershell
-$RefreshToken = "COLE_SEU_REFRESH_TOKEN_AQUI"
-$Body = @{ refreshToken = $RefreshToken } | ConvertTo-Json -Compress
-Invoke-WebRequest -Uri "http://localhost:3000/auth/refresh" `
+Invoke-WebRequest -Uri "http://localhost:3000/posts/1" `
+  -Method DELETE `
+  -Headers @{Authorization="Bearer $Token"} `
+  -UseBasicParsing
+```
+
+---
+
+### 22. Listar comentários de uma notícia (público)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/comments/post/1" `
+  -UseBasicParsing
+```
+
+---
+
+### 23. Criar comentário (autenticado)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/comments" `
   -Method POST -ContentType "application/json" `
-  -Body $Body `
+  -Headers @{Authorization="Bearer $Token"} `
+  -Body '{"text":"Excelente artigo! Muito informativo.","postId":1}' `
+  -UseBasicParsing
+```
+
+---
+
+### 24. Atualizar comentário (apenas o autor)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/comments/1" `
+  -Method PUT -ContentType "application/json" `
+  -Headers @{Authorization="Bearer $Token"} `
+  -Body '{"text":"Comentario atualizado com mais contexto."}' `
+  -UseBasicParsing
+```
+
+---
+
+### 25. Deletar comentário (autor ou ADMIN)
+
+```powershell
+Invoke-WebRequest -Uri "http://localhost:3000/comments/1" `
+  -Method DELETE `
+  -Headers @{Authorization="Bearer $Token"} `
   -UseBasicParsing
 ```
 
