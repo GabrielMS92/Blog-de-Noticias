@@ -1,0 +1,37 @@
+name: CI - Testes Automatizados
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # DATABASE_URL é sobrescrito pelo vitest.config.ts para test.db durante os testes.
+    # As migrations são aplicadas automaticamente pelo globalSetup antes da suíte.
+    env:
+      DATABASE_URL: "file:./prisma/test.db"
+      JWT_SECRET: "chave_secreta_para_ci_actions"
+      JWT_REFRESH_SECRET: "chave_refresh_secreta_para_ci_actions"
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: npm install
+
+    - name: Gerar Prisma Client
+      run: npx prisma generate
+
+    - name: Executar testes e gerar cobertura
+      run: npm run test:coverage
