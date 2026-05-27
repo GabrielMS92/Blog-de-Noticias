@@ -102,44 +102,44 @@ O servidor sobe em `http://localhost:3000` por padrão.
 ## Exemplos de requisições
 
 ### Registrar usuário
-```bash
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name": "João Silva", "email": "joao@email.com", "password": "senha123"}'
+```powershell
+curl.exe -X POST http://localhost:3000/auth/register `
+  -H "Content-Type: application/json" `
+  -d '{\"name\": \"João Silva\", \"email\": \"joao@email.com\", \"password\": \"senha123\"}'
 ```
 
 ### Fazer login
-```bash
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "joao@email.com", "password": "senha123"}'
+```powershell
+curl.exe -X POST http://localhost:3000/auth/login `
+  -H "Content-Type: application/json" `
+  -d '{\"email\": \"joao@email.com\", \"password\": \"senha123\"}'
 ```
 
 ### Ver perfil autenticado
-```bash
-curl http://localhost:3000/auth/me \
+```powershell
+curl.exe http://localhost:3000/auth/me `
   -H "Authorization: Bearer <seu_token>"
 ```
 
 ### Criar notícia
-```bash
-curl -X POST http://localhost:3000/posts \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <seu_token>" \
-  -d '{"title": "Minha primeira notícia", "content": "Conteúdo completo da notícia aqui.", "categoryId": 1}'
+```powershell
+curl.exe -X POST http://localhost:3000/posts `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer <seu_token>" `
+  -d '{\"title\": \"Minha primeira notícia\", \"content\": \"Conteúdo completo da notícia aqui.\", \"categoryId\": 1}'
 ```
 
 ### Listar notícias com paginação
-```bash
-curl "http://localhost:3000/posts?page=1&limit=5&search=api"
+```powershell
+curl.exe "http://localhost:3000/posts?page=1&limit=5&search=api"
 ```
 
 ### Criar categoria (ADMIN)
-```bash
-curl -X POST http://localhost:3000/categories \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token_admin>" \
-  -d '{"name": "Tecnologia"}'
+```powershell
+curl.exe -X POST http://localhost:3000/categories `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer <token_admin>" `
+  -d '{\"name\": \"Tecnologia\"}'
 ```
 
 ---
