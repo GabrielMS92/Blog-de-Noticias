@@ -2,17 +2,12 @@
 # API REST — Blog de Notícias
 # Extensão necessária: REST Client (VS Code)
 # =============================================================
-# Como usar:
-#   1. Inicie o servidor: npm run dev
-#   2. Execute "3. Login (usuário)" ou "4. Login (admin)"
-#   3. Cole os tokens retornados nas variáveis @token e @adminToken
-#   4. Execute as demais requisições na ordem que desejar.
-# =============================================================
 
-@baseUrl = http://localhost:3000
-@token = COLE_SEU_TOKEN_AQUI
-@refreshToken = COLE_SEU_REFRESH_TOKEN_AQUI
-@adminToken = COLE_SEU_TOKEN_ADMIN_AQUI
+@baseUrl       = http://localhost:3000
+@token         = COLE_SEU_TOKEN_AQUI
+@refreshToken  = COLE_SEU_REFRESH_TOKEN_AQUI
+@adminToken    = COLE_SEU_TOKEN_ADMIN_AQUI
+@adminRefresh  = COLE_SEU_REFRESH_TOKEN_ADMIN_AQUI
 
 
 # =============================================================
@@ -24,7 +19,7 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "name": "João Silva",
+  "name": "Joao Silva",
   "email": "joao@email.com",
   "password": "senha123"
 }
@@ -55,7 +50,7 @@ Content-Type: application/json
 
 ###
 
-### 4. Login (admin)
+### 4. Login (administrador)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -72,7 +67,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-### 6. Renovar token expirado
+### 6. Renovar token do usuário comum
 POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
@@ -82,36 +77,46 @@ Content-Type: application/json
 
 ###
 
+### 7. Renovar token do administrador
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{adminRefresh}}"
+}
+
+###
+
 
 # =============================================================
-# USUÁRIOS (requer token de ADMIN)
+# USUÁRIOS
 # =============================================================
 
-### 7. Listar todos os usuários (ADMIN)
+### 8. Listar todos os usuários (ADMIN)
 GET {{baseUrl}}/users
 Authorization: Bearer {{adminToken}}
 
 ###
 
-### 8. Buscar usuário por ID (ADMIN)
+### 9. Buscar usuário por ID (ADMIN)
 GET {{baseUrl}}/users/1
 Authorization: Bearer {{adminToken}}
 
 ###
 
-### 9. Atualizar próprio usuário (dono ou ADMIN)
+### 10. Atualizar próprio usuário (dono ou ADMIN)
 PUT {{baseUrl}}/users/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "João Atualizado",
+  "name": "Joao Atualizado",
   "email": "joao.novo@email.com"
 }
 
 ###
 
-### 10. Deletar usuário (ADMIN)
+### 11. Deletar usuário (ADMIN)
 DELETE {{baseUrl}}/users/2
 Authorization: Bearer {{adminToken}}
 
@@ -122,17 +127,17 @@ Authorization: Bearer {{adminToken}}
 # CATEGORIAS
 # =============================================================
 
-### 11. Listar todas as categorias (público)
+### 12. Listar todas as categorias (público)
 GET {{baseUrl}}/categories
 
 ###
 
-### 12. Buscar categoria por ID com suas notícias (público)
+### 13. Buscar categoria por ID (público)
 GET {{baseUrl}}/categories/1
 
 ###
 
-### 13. Criar categoria (ADMIN)
+### 14. Criar categoria (ADMIN)
 POST {{baseUrl}}/categories
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
@@ -143,18 +148,18 @@ Content-Type: application/json
 
 ###
 
-### 14. Atualizar categoria (ADMIN)
+### 15. Atualizar categoria (ADMIN)
 PUT {{baseUrl}}/categories/1
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "name": "Tecnologia e Inovação"
+  "name": "Tecnologia e Inovacao"
 }
 
 ###
 
-### 15. Deletar categoria (ADMIN)
+### 16. Deletar categoria (ADMIN)
 DELETE {{baseUrl}}/categories/1
 Authorization: Bearer {{adminToken}}
 
@@ -165,48 +170,48 @@ Authorization: Bearer {{adminToken}}
 # NOTÍCIAS (POSTS)
 # =============================================================
 
-### 16. Listar notícias com paginação (público)
+### 17. Listar notícias com paginação (público)
 GET {{baseUrl}}/posts?page=1&limit=10
 
 ###
 
-### 17. Listar notícias com busca por termo (público)
-GET {{baseUrl}}/posts?page=1&limit=5&search=tecnologia
+### 18. Listar notícias com busca por termo (público)
+GET {{baseUrl}}/posts?page=1&limit=5&search=noticia
 
 ###
 
-### 18. Buscar notícia por ID (público)
+### 19. Buscar notícia por ID (público)
 GET {{baseUrl}}/posts/1
 
 ###
 
-### 19. Criar notícia (autenticado)
+### 20. Criar notícia (autenticado)
 POST {{baseUrl}}/posts
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Minha primeira notícia",
-  "content": "Conteúdo completo da notícia aqui.",
+  "title": "Minha primeira noticia",
+  "content": "Conteudo completo da noticia aqui.",
   "categoryId": 1
 }
 
 ###
 
-### 20. Atualizar notícia (dono ou ADMIN)
+### 21. Atualizar notícia (dono ou ADMIN)
 PUT {{baseUrl}}/posts/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Título atualizado",
-  "content": "Conteúdo atualizado com mais detalhes.",
+  "title": "Titulo atualizado",
+  "content": "Conteudo atualizado com mais detalhes.",
   "categoryId": 1
 }
 
 ###
 
-### 21. Deletar notícia — soft delete (dono ou ADMIN)
+### 22. Deletar notícia — soft delete (dono ou ADMIN)
 DELETE {{baseUrl}}/posts/1
 Authorization: Bearer {{token}}
 
@@ -217,12 +222,12 @@ Authorization: Bearer {{token}}
 # COMENTÁRIOS
 # =============================================================
 
-### 22. Listar comentários de uma notícia (público)
+### 23. Listar comentários de uma notícia (público)
 GET {{baseUrl}}/comments/post/1
 
 ###
 
-### 23. Criar comentário (autenticado)
+### 24. Criar comentário (autenticado)
 POST {{baseUrl}}/comments
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -234,18 +239,18 @@ Content-Type: application/json
 
 ###
 
-### 24. Atualizar comentário (apenas o autor)
+### 25. Atualizar comentário (apenas o autor)
 PUT {{baseUrl}}/comments/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "text": "Comentário atualizado com mais contexto."
+  "text": "Comentario atualizado com mais contexto."
 }
 
 ###
 
-### 25. Deletar comentário (autor ou ADMIN)
+### 26. Deletar comentário (autor ou ADMIN)
 DELETE {{baseUrl}}/comments/1
 Authorization: Bearer {{token}}
 
