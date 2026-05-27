@@ -1,0 +1,252 @@
+# =============================================================
+# API REST — Blog de Notícias
+# Extensão necessária: REST Client (VS Code)
+# =============================================================
+# Como usar:
+#   1. Inicie o servidor: npm run dev
+#   2. Execute "3. Login (usuário)" ou "4. Login (admin)"
+#   3. Cole os tokens retornados nas variáveis @token e @adminToken
+#   4. Execute as demais requisições na ordem que desejar.
+# =============================================================
+
+@baseUrl = http://localhost:3000
+@token = COLE_SEU_TOKEN_AQUI
+@refreshToken = COLE_SEU_REFRESH_TOKEN_AQUI
+@adminToken = COLE_SEU_TOKEN_ADMIN_AQUI
+
+
+# =============================================================
+# AUTENTICAÇÃO
+# =============================================================
+
+### 1. Registrar usuário comum
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+###
+
+### 2. Registrar administrador
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin",
+  "email": "admin@email.com",
+  "password": "senha123",
+  "role": "ADMIN"
+}
+
+###
+
+### 3. Login (usuário comum)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+###
+
+### 4. Login (admin)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "password": "senha123"
+}
+
+###
+
+### 5. Ver perfil autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Renovar token expirado
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+
+# =============================================================
+# USUÁRIOS (requer token de ADMIN)
+# =============================================================
+
+### 7. Listar todos os usuários (ADMIN)
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 8. Buscar usuário por ID (ADMIN)
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 9. Atualizar próprio usuário (dono ou ADMIN)
+PUT {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "João Atualizado",
+  "email": "joao.novo@email.com"
+}
+
+###
+
+### 10. Deletar usuário (ADMIN)
+DELETE {{baseUrl}}/users/2
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+# =============================================================
+# CATEGORIAS
+# =============================================================
+
+### 11. Listar todas as categorias (público)
+GET {{baseUrl}}/categories
+
+###
+
+### 12. Buscar categoria por ID com suas notícias (público)
+GET {{baseUrl}}/categories/1
+
+###
+
+### 13. Criar categoria (ADMIN)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Tecnologia"
+}
+
+###
+
+### 14. Atualizar categoria (ADMIN)
+PUT {{baseUrl}}/categories/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Tecnologia e Inovação"
+}
+
+###
+
+### 15. Deletar categoria (ADMIN)
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+# =============================================================
+# NOTÍCIAS (POSTS)
+# =============================================================
+
+### 16. Listar notícias com paginação (público)
+GET {{baseUrl}}/posts?page=1&limit=10
+
+###
+
+### 17. Listar notícias com busca por termo (público)
+GET {{baseUrl}}/posts?page=1&limit=5&search=tecnologia
+
+###
+
+### 18. Buscar notícia por ID (público)
+GET {{baseUrl}}/posts/1
+
+###
+
+### 19. Criar notícia (autenticado)
+POST {{baseUrl}}/posts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Minha primeira notícia",
+  "content": "Conteúdo completo da notícia aqui.",
+  "categoryId": 1
+}
+
+###
+
+### 20. Atualizar notícia (dono ou ADMIN)
+PUT {{baseUrl}}/posts/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Título atualizado",
+  "content": "Conteúdo atualizado com mais detalhes.",
+  "categoryId": 1
+}
+
+###
+
+### 21. Deletar notícia — soft delete (dono ou ADMIN)
+DELETE {{baseUrl}}/posts/1
+Authorization: Bearer {{token}}
+
+###
+
+
+# =============================================================
+# COMENTÁRIOS
+# =============================================================
+
+### 22. Listar comentários de uma notícia (público)
+GET {{baseUrl}}/comments/post/1
+
+###
+
+### 23. Criar comentário (autenticado)
+POST {{baseUrl}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "Excelente artigo! Muito informativo.",
+  "postId": 1
+}
+
+###
+
+### 24. Atualizar comentário (apenas o autor)
+PUT {{baseUrl}}/comments/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "Comentário atualizado com mais contexto."
+}
+
+###
+
+### 25. Deletar comentário (autor ou ADMIN)
+DELETE {{baseUrl}}/comments/1
+Authorization: Bearer {{token}}
+
+###
